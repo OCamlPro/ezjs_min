@@ -20,6 +20,7 @@
  (depends
   (ocaml (>= 4.05))
   (dune (>= 2.0))
-  (js_of_ocaml-ppx (>= 3.6))
-  (stdlib-shims (>= 0.1))
-  (lwt (>= 4.0.0))))
+  js_of_ocaml-ppx
+  (stdlib-shims (>= 0.1)))
+ (depopts lwt)
+ (conflicts (lwt (< 4.0.0))))
