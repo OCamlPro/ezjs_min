@@ -1,10 +1,7 @@
-module Js = Ezjs_min.Js
-module Dom = Ezjs_min.Dom
-module Log = Ezjs_min.Log
+include Ezjs_min
 
 module Promise = struct
-  open Js
-  include Ezjs_min.Promise
+  include Promise
 
   let ( >>= ) = Lwt.( >>= )
   let ( >|= ) = Lwt.( >|= )
