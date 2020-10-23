@@ -7,6 +7,8 @@ module Dom = Js_of_ocaml.Dom
 module Typed_array = Js_of_ocaml.Typed_array
 module Regexp = Js_of_ocaml.Regexp
 
+exception JsError = Error
+
 type ('a, 'b) result = ('a, 'b) Stdlib.result = Ok of 'a | Error of 'b
 
 type window = Dom_html.window
@@ -52,6 +54,11 @@ let log fmt =
   Format.kfprintf
     (fun _fmt -> js_log (string (Format.flush_str_formatter ())))
     Format.str_formatter fmt
+
+let error_of_string s = new%js error_constr (string s)
+let catch_exn f = function
+  | JsError e -> f e
+  | exn -> f @@ error_of_string @@ Printexc.to_string exn
 
 type 'a aopt = 'a
 

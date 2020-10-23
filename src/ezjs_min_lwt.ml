@@ -7,6 +7,7 @@ module Promise = struct
   include Ezjs_min.Promise
 
   let ( >>= ) = Lwt.( >>= )
+  let ( >|= ) = Lwt.( >|= )
 
   let return = Lwt.return
 
@@ -14,54 +15,42 @@ module Promise = struct
 
   let return_unit = Lwt.return_unit
 
+  let (>>=?) v f =
+    v >>= function
+    | Error _ as err -> Lwt.return err
+    | Ok v -> f v
+
+  let (>>|?) v f = v >>=? fun v -> Lwt.return (Ok (f v))
+
+
   (* promises *)
 
   let to_lwt (p : 'a promise t) =
     let waiter, notifier = Lwt.wait () in
-    (p##_then (wrap_callback (fun x -> Lwt.wakeup notifier (Ok x))))##catch
-      (wrap_callback (fun x -> Lwt.wakeup notifier (Error x)))
-    |> ignore ;
+    rthen p (Lwt.wakeup notifier);
     waiter
 
   let to_lwt_opt cb (p : 'a promise t) =
-    let waiter, notifier = Lwt.wait () in
-    (p##_then (wrap_callback (fun x -> Lwt.wakeup notifier (Ok x))))##catch
-      (wrap_callback (fun x -> Lwt.wakeup notifier (Error x)))
-    |> ignore ;
-    waiter
-    >>= function
-    | Error e ->
-      return (Error e)
-    | Ok x -> (
-        match cb with
-        | None ->
-          return (Ok None)
-        | Some cb ->
-          return (Ok (Some (cb x))) )
+    to_lwt p >>= function
+    | Error e -> return (Error e)
+    | Ok x -> match cb with
+      | None -> Lwt.return_ok None
+      | Some cb -> Lwt.return_ok @@ Some (cb x)
 
   let to_lwt_tr tr (p : 'a promise t) =
-    let waiter, notifier = Lwt.wait () in
-    (p##_then (wrap_callback (fun x -> Lwt.wakeup notifier (Ok x))))##catch
-      (wrap_callback (fun x -> Lwt.wakeup notifier (Error x)))
-    |> ignore ;
-    waiter >>= function Error e -> return (Error e) | Ok x -> return (Ok (tr x))
+    to_lwt p >>|? tr
 
   let to_lwt_exn (p : 'a promise t) =
     let waiter, notifier = Lwt.wait () in
-    p##_then (wrap_callback (Lwt.wakeup notifier)) |> ignore ;
+    jthen p (Lwt.wakeup notifier);
     waiter
 
   let to_lwt_exn_opt cb (p : 'a promise t) =
-    let waiter, notifier = Lwt.wait () in
-    p##_then (wrap_callback (Lwt.wakeup notifier)) |> ignore ;
-    waiter
-    >>= fun x ->
+    to_lwt_exn p >>= fun x ->
     match cb with None -> return None | Some cb -> return (Some (cb x))
 
   let to_lwt_exn_tr tr (p : 'a promise t) =
-    let waiter, notifier = Lwt.wait () in
-    p##_then (wrap_callback (Lwt.wakeup notifier)) |> ignore ;
-    waiter >>= fun x -> return (tr x)
+    to_lwt_exn p >|= tr
 
   (* callbacks *)
 
@@ -91,19 +80,13 @@ module Promise = struct
 
   let promise_lwt res =
     let f resolve _reject =
-      async (fun () -> res >>= fun value -> resolve value ; return_unit)
-    in
+      async (fun () -> res >>= fun value -> resolve value ; return_unit) in
     promise f
 
   let promise_lwt_res res =
     let f resolve reject =
-      async (fun () ->
-          res
-          >>= function
-          | Ok value ->
-            resolve value ; return_unit
-          | Error reason ->
-            reject reason ; return_unit)
-    in
+      async (fun () -> res >>= function
+        | Ok value -> resolve value ; return_unit
+        | Error reason -> reject reason ; return_unit) in
     promise f
 end
