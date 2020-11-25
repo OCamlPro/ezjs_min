@@ -11,17 +11,17 @@ let add (t : 'a t) (k : string) (v : 'a) = Unsafe.set t (string k) v
 let add_list (t : 'a t) (l : (string * 'a) list) =
   List.iter (fun (k, v) -> add t k v) l
 
-let add_listf (t : 'a t) f (l : (string * 'a) list) =
+let add_listf (t : 'b t) (f : ('a -> 'b)) (l : (string * 'a) list) =
   List.iter (fun (k, v) -> add t k (f v)) l
 
 let make (l : (string * 'a) list) : 'a t =
   let t = create () in
-  List.iter (fun (k, v) -> add t k v) l;
+  add_list t l;
   t
 
-let makef f (l : (string * 'a) list) : 'a t =
+let makef (f : ('a -> 'b)) (l : (string * 'a) list) : 'b t =
   let t = create () in
-  List.iter (fun (k, v) -> add t k (f v)) l;
+  add_listf t f l;
   t
 
 let remove (t : 'a t) (k : string) = Unsafe.delete t (string k)
@@ -35,7 +35,7 @@ let keys (t : 'a t) : string list =
 let items (t : 'a t) : (string * 'a) list =
   to_listf (fun k -> to_string k, Unsafe.get t k) @@ obj##keys t
 
-let itemsf f (t : 'a t) : (string * 'a) list =
+let itemsf (f : ('a -> 'b)) (t : 'a t) : (string * 'b) list =
   to_listf (fun k -> to_string k, f @@ Unsafe.get t k) @@ obj##keys t
 
 let length (t : 'a t) = (obj##keys t)##.length
