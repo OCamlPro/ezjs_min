@@ -88,3 +88,5 @@ module AOpt = struct
     | Some x -> return (f x)
   let to_aopt (f : 'a -> 'b) (x : 'a t) : 'b option = case x (fun () -> None) (fun x -> Some (f x))
 end
+
+type 'a case_prop = < get : 'a optdef > gen_prop
