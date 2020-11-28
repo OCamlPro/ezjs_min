@@ -90,3 +90,13 @@ module AOpt = struct
 end
 
 type 'a case_prop = < get : 'a optdef > gen_prop
+
+let rec choose_case_opt = function
+  | [] -> undefined
+  | h :: t -> match Optdef.to_option h with None -> choose_case_opt t | Some _ -> h
+
+let rec choose_case l = choose_case_opt (List.map Optdef.return l)
+
+let object_cs = Unsafe.global##._Object
+let assign (o1 : _ t) (o2 : _ t) = Unsafe.coerce (object_cs##assign o1 o2)
+let assign_list l = Unsafe.coerce (Unsafe.meth_call object_cs "assign" (Array.of_list l))
