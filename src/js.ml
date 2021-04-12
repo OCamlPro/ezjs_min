@@ -60,25 +60,24 @@ let catch_exn f = function
   | JsError e -> f e
   | exn -> f @@ error_of_string @@ Printexc.to_string exn
 
-type 'a aopt = 'a
-
 module AOpt = struct
-  let null : 'a aopt = Unsafe.pure_js_expr "null"
-  external some : 'a -> 'a aopt = "%identity"
-  let undefined : 'a aopt = Unsafe.pure_js_expr "undefined"
-  external def : 'a -> 'a aopt = "%identity"
-  external return : 'a -> 'a aopt = "%identity"
+  type +'a t
+  let null : 'a t = Unsafe.pure_js_expr "null"
+  external some : 'a -> 'a t = "%identity"
+  let undefined : 'a t = Unsafe.pure_js_expr "undefined"
+  external def : 'a -> 'a t = "%identity"
+  external return : 'a -> 'a t = "%identity"
+  external coerce : 'a t -> 'a = "%identity"
   external js_equals : 'a -> 'b -> bool = "caml_js_equals"
-  type 'a t = 'a aopt
   let is_none (x : 'a t) : bool = x == undefined || js_equals x null
   let map ?(none=undefined) (x : 'a t) (f : 'a -> 'b) : 'b t =
-    if is_none x then none else return (f x)
+    if is_none x then none else return (f (coerce x))
   let bind ?(none=undefined) (x : 'a t) (f : 'a -> 'b t) : 'b t =
-    if is_none x then none else f x
+    if is_none x then none else f (coerce x)
   let test (x : 'a t) : bool = not (is_none x)
-  let iter (x : 'a t) (f : 'a -> unit) : unit = if not (is_none x) then f x
-  let case (x : 'a t) (f : unit -> 'b) (g : 'a -> 'b) : 'b = if is_none x then f () else g x
-  let get (x : 'a t) (f : unit -> 'a) : 'a = if is_none x then f () else x
+  let iter (x : 'a t) (f : 'a -> unit) : unit = if not (is_none x) then f (coerce x)
+  let case (x : 'a t) (f : unit -> 'b) (g : 'a -> 'b) : 'b = if is_none x then f () else g (coerce x)
+  let get (x : 'a t) (f : unit -> 'a) : 'a = if is_none x then f () else (coerce x)
   let option ?(none=undefined) (x : 'a option) : 'a t = match x with
     | None -> none
     | Some x -> return x
@@ -88,6 +87,7 @@ module AOpt = struct
     | Some x -> return (f x)
   let to_aopt (f : 'a -> 'b) (x : 'a t) : 'b option = case x (fun () -> None) (fun x -> Some (f x))
 end
+type 'a aopt = 'a AOpt.t
 
 type 'a case_prop = < get : 'a optdef > gen_prop
 
@@ -95,7 +95,7 @@ let rec choose_case_opt = function
   | [] -> undefined
   | h :: t -> match Optdef.to_option h with None -> choose_case_opt t | Some _ -> h
 
-let rec choose_case l = choose_case_opt (List.map Optdef.return l)
+let choose_case l = choose_case_opt (List.map Optdef.return l)
 
 let object_cs = Unsafe.global##._Object
 let assign (o1 : _ t) (o2 : _ t) = Unsafe.coerce (object_cs##assign o1 o2)

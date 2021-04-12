@@ -6,7 +6,7 @@ class type ['a, 'b] promise0 =
     method catch : ('b -> unit) callback -> ('a, 'b) promise0 t meth
   end
 
-type 'a promise = ('a, error t) promise0
+class type ['a] promise = ['a, error t] promise0
 
 type ('a, 'b) promise_cs =
   ((('a -> unit) -> ('b -> unit) -> unit) callback -> ('a, 'b) promise0 t)
