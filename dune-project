@@ -1,4 +1,4 @@
-(lang dune 2.0)
+(lang dune 2.8)
 
 (name ezjs_min)
 
@@ -19,7 +19,6 @@
  (description "A bunch of js_of_ocaml shortcuts")
  (depends
   (ocaml (>= 4.05))
-  (dune (>= 2.0))
   js_of_ocaml-ppx
   (stdlib-shims (>= 0.1)))
  (depopts lwt)

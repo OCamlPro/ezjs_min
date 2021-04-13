@@ -8,17 +8,18 @@ license: "LGPL-2.1"
 homepage: "https://github.com/ocamlpro/ezjs_min"
 bug-reports: "https://github.com/ocamlpro/ezjs_min/issues"
 depends: [
+  "dune" {>= "2.8"}
   "ocaml" {>= "4.05"}
-  "dune" {>= "2.0"}
   "js_of_ocaml-ppx"
   "stdlib-shims" {>= "0.1"}
+  "odoc" {with-doc}
 ]
 depopts: ["lwt"]
 conflicts: [
   "lwt" {< "4.0.0"}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
