@@ -100,3 +100,8 @@ let choose_case l = choose_case_opt (List.map Optdef.return l)
 let object_cs = Unsafe.global##._Object
 let assign (o1 : _ t) (o2 : _ t) = Unsafe.coerce (object_cs##assign o1 o2)
 let assign_list l = Unsafe.coerce (Unsafe.meth_call object_cs "assign" (Array.of_list l))
+
+let remove_undefined o =
+  let keys = object_keys o in
+  keys##forEach (wrap_callback (fun k _ _ ->
+      if not (Optdef.test (Unsafe.get o k)) then Unsafe.delete o k))

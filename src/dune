@@ -1,3 +1,5 @@
+(env (_ (flags (:standard -w +a-4-41-44-45-48-70 -warn-error -a))))
+
 (library
  (public_name ezjs_min)
  (modules js dom log promise table bigInt ezjs_min)

@@ -64,10 +64,13 @@ let replaceChildren parent children =
 
 let by_id s = Dom_html.getElementById s
 
-let addListener elt ev f =
-  ignore
-  @@ Dom.addEventListener elt (Dom.Event.make ev)
-       (Dom.handler (fun e -> bool (f e)))
+let addListener ?capture ?once ?passive elt ev f =
+  let capture = Option.map bool capture in
+  let once = Option.map bool once in
+  let passive = Option.map bool passive in
+  ignore @@
+  Dom.addEventListenerWithOptions ?capture ?once ?passive elt (Dom.Event.make ev)
+    (Dom.handler (fun e -> bool (f e)))
 
 module El = struct
   let create ?(classes = []) ?(styles = []) ?(listen = []) ?(attr = []) ?text f
