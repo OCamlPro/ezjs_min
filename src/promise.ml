@@ -13,7 +13,7 @@ type ('a, 'b) promise_cs =
   constr
 
 let promise f =
-  let cs : ('a, error t) promise_cs = Unsafe.global##._Promise in
+  let cs : ('a, 'b) promise_cs = Unsafe.global##._Promise in
   new%js cs (wrap_callback f)
 
 let jthen0 ?error (prom : ('a, 'b t) promise0 t) f =
