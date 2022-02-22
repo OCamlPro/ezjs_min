@@ -8,7 +8,7 @@ end
 
 type nonrec t = bigInt t
 
-let bigInt : (Unsafe.any -> t) = Unsafe.variable "BigInt"
+let bigInt : (Unsafe.any -> t) = Unsafe.pure_js_expr "BigInt"
 
 let of_string s = bigInt (Unsafe.inject @@ string s)
 let of_int (i : int) = bigInt (Unsafe.inject @@ i)

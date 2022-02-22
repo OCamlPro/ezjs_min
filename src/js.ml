@@ -7,8 +7,6 @@ module Dom = Js_of_ocaml.Dom
 module Typed_array = Js_of_ocaml.Typed_array
 module Regexp = Js_of_ocaml.Regexp
 
-exception JsError = Error
-
 type ('a, 'b) result = ('a, 'b) Stdlib.result = Ok of 'a | Error of 'b
 
 type window = Dom_html.window
@@ -57,7 +55,7 @@ let log fmt =
 
 let error_of_string s = new%js error_constr (string s)
 let catch_exn f = function
-  | JsError e -> f e
+  | Js_error.Exn e -> f (Js_error.to_error e)
   | exn -> f @@ error_of_string @@ Printexc.to_string exn
 
 module AOpt = struct

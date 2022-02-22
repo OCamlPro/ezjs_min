@@ -19,7 +19,7 @@
  (description "A bunch of js_of_ocaml shortcuts")
  (depends
   (ocaml (>= 4.05))
-  js_of_ocaml-ppx
+  (js_of_ocaml-ppx (>= 4.0.0))
   (stdlib-shims (>= 0.1)))
  (depopts lwt)
  (conflicts (lwt (< 4.0.0))))
