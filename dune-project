@@ -18,7 +18,7 @@
  (synopsis "A bunch of js_of_ocaml shortcuts")
  (description "A bunch of js_of_ocaml shortcuts")
  (depends
-  (ocaml (>= 4.05))
+  (ocaml (>= 4.08))
   (js_of_ocaml-ppx (>= 4.0.0))
   (stdlib-shims (>= 0.1)))
  (depopts lwt)
