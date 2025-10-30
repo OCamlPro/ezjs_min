@@ -1,6 +1,8 @@
 open Js
 
-type nonrec 'a t = < > t
+class type ['a] ct = object end
+
+type nonrec 'a t = 'a ct t
 
 let obj = Unsafe.global##._Object
 
